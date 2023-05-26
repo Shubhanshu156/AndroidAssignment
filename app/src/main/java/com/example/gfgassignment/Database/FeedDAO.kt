@@ -18,7 +18,7 @@ interface FeedDAO {
     @Delete
     suspend fun delete(entities: FeedItem)
 
-    // Query annotation to fetch all FeedItem entities from the Feed table
+    // Query annotation to fetch all FeedItem entities from the Feed table sorted by publish date
     @Query("SELECT * FROM Feed")
     suspend fun getfeed(): List<FeedItem>
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import com.example.gfgassignment.Util.DateFormatter
 import androidx.compose.foundation.layout.height
@@ -27,11 +28,16 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -67,7 +73,6 @@ fun FeedScreen() {
         ShowImage()
     }
 }
-
 
 
 @Composable
@@ -192,20 +197,31 @@ fun ShowLargeImageShimmer() {
 @Composable
 fun SmallImageComposable(item: FeedItem) {
     // Display a card for a small image
+    var componentHeight by remember { mutableStateOf(0.dp) }
+
+    // get local density from composable
+    val density = LocalDensity.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(12.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.Green)
+            .background(Color.White)
     ) {
-        Row() {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Column(
-                horizontalAlignment = Alignment.Start,
                 modifier = Modifier
+                    .fillMaxHeight()
                     .weight(7f)
                     .background(Color.White)
                     .padding(horizontal = 20.dp, vertical = 20.dp)
+                    .onGloballyPositioned {
+                        componentHeight = with(density) {
+                            it.size.height.toDp()
+                        }
+                    }
             ) {
                 // Display the title of the feed item
                 Text(
@@ -214,7 +230,8 @@ fun SmallImageComposable(item: FeedItem) {
                     fontFamily = Constants.fontfamily,
                     fontWeight = FontWeight.Medium,
                     fontSize = 18.sp,
-                    maxLines = 3
+                    maxLines = 3,
+                    modifier = Modifier.fillMaxHeight()
                 )
                 Spacer(
                     modifier = Modifier
@@ -230,8 +247,8 @@ fun SmallImageComposable(item: FeedItem) {
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier
                     .weight(3f)
-                    .fillMaxHeight()
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .height(componentHeight+40.dp),
                 model = item.thumbnail,
                 contentDescription = ""
             )
@@ -243,32 +260,39 @@ fun SmallImageComposable(item: FeedItem) {
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun ShowLargeImage(item: FeedItem) {
-    // Display a card for a large top image
+    //initial height set at 0.dp
+    var componentHeight by remember { mutableStateOf(0.dp) }
+
+    // get local density from composable
+    val density = LocalDensity.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(12.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.Green)
+            .background(Color.Gray)
     ) {
-        // Display the large top image using AsyncImage
         AsyncImage(
             model = item.enclosure,
             contentDescription = "large top image",
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(300.dp)
-                .background(Color.Green)
+                .height(componentHeight+80.dp)
         )
 
         Column(
             horizontalAlignment = Alignment.Start,
             modifier = Modifier
+                .fillMaxSize()
                 .background(Color.White)
                 .padding(horizontal = 20.dp, vertical = 20.dp)
+                .onGloballyPositioned {
+                    componentHeight = with(density) {
+                        it.size.height.toDp()
+                    }
+                }
         ) {
-            // Display the title of the feed item
             Text(
                 text = item.title,
                 color = Color(71, 149, 71),
@@ -298,8 +322,6 @@ fun ShowLargeImage(item: FeedItem) {
 
             FormattedDateText(inputDate = item.pubDate)
         }
-
-
     }
 }
 
